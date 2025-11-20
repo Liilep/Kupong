@@ -20,7 +20,7 @@
       color: #111827;
     }
     .container {
-      max-width: 900px;
+      max-width: 1100px;
       margin: 0 auto;
       background: white;
       padding: 1.5rem 2rem;
@@ -31,6 +31,12 @@
       margin-top: 0;
       font-size: 1.7rem;
       text-align: center;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+      gap: 1.5rem;
+      align-items: flex-start;
     }
     .field-group {
       margin-bottom: 1rem;
@@ -100,42 +106,146 @@
     .status--info {
       color: #374151;
     }
+
+    /* Preview-stil */
+    .preview-wrapper {
+      border-left: 1px solid #e5e7eb;
+      padding-left: 1.5rem;
+    }
+    .preview-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .ticket-preview {
+      border-radius: 0.75rem;
+      border: 1px solid #e5e7eb;
+      padding: 1rem;
+      background: #f9fafb;
+      width: 100%;
+      max-width: 340px;
+      aspect-ratio: 2/1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0.5rem;
+    }
+    .ticket-preview-logo {
+      max-width: 40%;
+      max-height: 50px;
+      object-fit: contain;
+    }
+    .ticket-preview-title {
+      font-size: 1rem;
+      font-weight: 700;
+      text-align: center;
+      margin: 0.2rem 0;
+    }
+    .ticket-preview-qr {
+      max-width: 40%;
+      max-height: 80px;
+      object-fit: contain;
+    }
+    .ticket-preview-body {
+      font-size: 0.8rem;
+      text-align: center;
+      padding: 0 0.5rem;
+    }
+
+    .color-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .color-row input[type="color"] {
+      width: 40px;
+      height: 30px;
+      padding: 0;
+      border-radius: 0.5rem;
+      border: 1px solid #d1d5db;
+      background: transparent;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .preview-wrapper {
+        border-left: none;
+        border-top: 1px solid #e5e7eb;
+        padding-left: 0;
+        padding-top: 1.5rem;
+        margin-top: 1.5rem;
+      }
+      .ticket-preview {
+        margin-inline: auto;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Biljettgenerator – 6 biljetter per A4</h1>
 
-    <div class="field-group">
-      <label for="qrFiles">QR-koder (PNG/JPG, flera filer)</label>
-      <input id="qrFiles" type="file" accept="image/png,image/jpeg" multiple />
-      <div class="help">Välj alla QR-kodbilderna (t.ex. 1000 st). En bild per biljett.</div>
-    </div>
+    <div class="layout">
+      <!-- Vänster: Formulär -->
+      <div>
+        <div class="field-group">
+          <label for="qrFiles">QR-koder (PNG/JPG, flera filer)</label>
+          <input id="qrFiles" type="file" accept="image/png,image/jpeg" multiple />
+          <div class="help">Välj alla QR-kodbilderna (t.ex. 1000 st). En bild per biljett.</div>
+        </div>
 
-    <div class="field-group">
-      <label for="logoFile">Logga (valfri)</label>
-      <input id="logoFile" type="file" accept="image/*" />
-      <div class="help">Om du väljer en logga placeras den överst på varje biljett.</div>
-    </div>
+        <div class="field-group">
+          <label for="logoFile">Logga (valfri)</label>
+          <input id="logoFile" type="file" accept="image/*" />
+          <div class="help">Loggan behåller proportionerna och placeras överst på biljett.</div>
+        </div>
 
-    <div class="field-group">
-      <label for="titleInput">Rubrik på biljetten</label>
-      <input id="titleInput" type="text" placeholder="Ex: VIP-biljett • Event 2025" />
-    </div>
+        <div class="field-group">
+          <label for="titleInput">Rubrik på biljetten</label>
+          <input id="titleInput" type="text" placeholder="Ex: VIP-biljett • Event 2025" />
+        </div>
 
-    <div class="field-group">
-      <label for="bodyInput">Text på biljetten</label>
-      <textarea id="bodyInput" placeholder="Ex: Giltig för en person. Ta med legitimation."></textarea>
-    </div>
+        <div class="field-group">
+          <label for="titleColor">Färg på rubriken</label>
+          <div class="color-row">
+            <input id="titleColor" type="color" value="#111827" />
+            <span class="help">Välj valfri rubrikfärg (används både i preview och PDF).</span>
+          </div>
+        </div>
 
-    <div class="field-group">
-      <button id="generateBtn">Generera PDF</button>
-      <div class="status status--info" id="statusText"></div>
-    </div>
+        <div class="field-group">
+          <label for="bodyInput">Text på biljetten</label>
+          <textarea id="bodyInput" placeholder="Ex: Giltig för en person. Ta med legitimation."></textarea>
+        </div>
 
-    <div class="help">
-      Obs: Du måste först välja minst en QR-bild innan knappen gör något.
-      PDF:en laddas ned automatiskt som <strong>biljetter_qr.pdf</strong>.
+        <div class="field-group">
+          <button id="generateBtn">Generera PDF</button>
+          <div class="status status--info" id="statusText"></div>
+        </div>
+
+        <div class="help">
+          Obs: Du måste först välja minst en QR-bild innan knappen gör något.
+          PDF:en laddas ned automatiskt som <strong>biljetter_qr.pdf</strong>.
+        </div>
+      </div>
+
+      <!-- Höger: Preview -->
+      <div class="preview-wrapper">
+        <div class="preview-title">Förhandsvisning av biljett</div>
+        <div class="ticket-preview" id="ticketPreview">
+          <img id="previewLogo" class="ticket-preview-logo" alt="Förhandsvisning logga" style="display:none;" />
+          <div id="previewTitle" class="ticket-preview-title">Rubrik visas här</div>
+          <img id="previewQr" class="ticket-preview-qr" alt="Förhandsvisning QR" style="display:none;" />
+          <div id="previewBody" class="ticket-preview-body">
+            Texten på biljetten visas här.
+          </div>
+        </div>
+        <div class="help" style="margin-top:0.5rem;">
+          Preview visar ungefärlig layout för en biljett (inte exakt A4-skala, men samma innehåll, logga, färg och text).
+        </div>
+      </div>
     </div>
   </div>
 
@@ -146,8 +256,15 @@
       const logoInput = document.getElementById("logoFile");
       const titleInput = document.getElementById("titleInput");
       const bodyInput = document.getElementById("bodyInput");
+      const titleColorInput = document.getElementById("titleColor");
       const generateBtn = document.getElementById("generateBtn");
       const statusText = document.getElementById("statusText");
+
+      // Preview-element
+      const previewLogo = document.getElementById("previewLogo");
+      const previewTitle = document.getElementById("previewTitle");
+      const previewQr = document.getElementById("previewQr");
+      const previewBody = document.getElementById("previewBody");
 
       function setStatus(message, type = "info") {
         statusText.textContent = message || "";
@@ -164,6 +281,17 @@
         });
       }
 
+      function getImageSize(dataUrl) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            resolve({ width: img.naturalWidth, height: img.naturalHeight });
+          };
+          img.onerror = (err) => reject(err);
+          img.src = dataUrl;
+        });
+      }
+
       async function loadImagesFromFiles(fileList) {
         const files = Array.from(fileList || []);
         const result = [];
@@ -174,6 +302,67 @@
         }
         return result;
       }
+
+      function hexToRgb(hex) {
+        if (!hex) return { r: 0, g: 0, b: 0 };
+        hex = hex.replace("#", "");
+        if (hex.length === 3) {
+          hex = hex.split("").map(c => c + c).join("");
+        }
+        const num = parseInt(hex, 16);
+        return {
+          r: (num >> 16) & 255,
+          g: (num >> 8) & 255,
+          b: num & 255
+        };
+      }
+
+      // --- Preview-uppdatering ---
+
+      // Uppdatera rubrik-preview
+      titleInput.addEventListener("input", () => {
+        const text = titleInput.value.trim();
+        previewTitle.textContent = text || "Rubrik visas här";
+      });
+
+      // Uppdatera text-preview
+      bodyInput.addEventListener("input", () => {
+        const text = bodyInput.value.trim();
+        previewBody.textContent = text || "Texten på biljetten visas här.";
+      });
+
+      // Uppdatera rubrikfärg-preview
+      titleColorInput.addEventListener("input", () => {
+        previewTitle.style.color = titleColorInput.value || "#111827";
+      });
+      // init
+      previewTitle.style.color = titleColorInput.value || "#111827";
+
+      // Uppdatera logo-preview
+      logoInput.addEventListener("change", async () => {
+        if (!logoInput.files || !logoInput.files.length) {
+          previewLogo.style.display = "none";
+          previewLogo.src = "";
+          return;
+        }
+        const dataUrl = await readFileAsDataURL(logoInput.files[0]);
+        previewLogo.src = dataUrl;
+        previewLogo.style.display = "block";
+      });
+
+      // Uppdatera QR-preview (första vald bild)
+      qrInput.addEventListener("change", async () => {
+        if (!qrInput.files || !qrInput.files.length) {
+          previewQr.style.display = "none";
+          previewQr.src = "";
+          return;
+        }
+        const dataUrl = await readFileAsDataURL(qrInput.files[0]);
+        previewQr.src = dataUrl;
+        previewQr.style.display = "block";
+      });
+
+      // --- PDF-generering ---
 
       async function generatePdf() {
         if (!window.jspdf || !window.jspdf.jsPDF) {
@@ -200,15 +389,20 @@
             return;
           }
 
+          // Logga: läs och ta fram aspect ratio
           let logoImage = null;
           if (logoInput.files && logoInput.files.length > 0) {
             const [logoFile] = logoInput.files;
             const logoDataUrl = await readFileAsDataURL(logoFile);
-            logoImage = { name: logoFile.name, dataUrl: logoDataUrl };
+            const size = await getImageSize(logoDataUrl);
+            const ratio = size.height / size.width; // h/w
+            logoImage = { name: logoFile.name, dataUrl: logoDataUrl, ratio };
           }
 
           const titleText = titleInput.value.trim();
           const bodyText = bodyInput.value.trim();
+          const titleColorHex = titleColorInput.value || "#111827";
+          const titleColorRgb = hexToRgb(titleColorHex);
 
           setStatus("Genererar PDF...", "info");
 
@@ -249,26 +443,39 @@
 
             let cursorY = y + innerPadding;
 
-            // Logga
+            // Logga (behåller proportioner)
             if (logoImage) {
-              const logoMaxWidth = cellWidth * 0.4;
-              const logoHeight = logoMaxWidth * 0.35; // ungefärlig ratio
-              const logoX = x + (cellWidth - logoMaxWidth) / 2;
+              // sätt maxstorlek inom cellen
+              const maxLogoWidth = cellWidth * 0.4;
+              const maxLogoHeight = cellHeight * 0.2; // 20% av höjden
+              let logoW = maxLogoWidth;
+              let logoH = logoW * logoImage.ratio; // h = w * (h/w)
+
+              if (logoH > maxLogoHeight) {
+                // skala ner om den blir för hög
+                logoH = maxLogoHeight;
+                logoW = logoH / logoImage.ratio;
+              }
+
+              const logoX = x + (cellWidth - logoW) / 2;
+
               doc.addImage(
                 logoImage.dataUrl,
                 "PNG",
                 logoX,
                 cursorY,
-                logoMaxWidth,
-                logoHeight
+                logoW,
+                logoH
               );
-              cursorY += logoHeight + 2;
+              cursorY += logoH + 2;
             }
 
             // Rubrik
             if (titleText) {
               doc.setFont("helvetica", "bold");
               doc.setFontSize(11);
+              doc.setTextColor(titleColorRgb.r, titleColorRgb.g, titleColorRgb.b);
+
               const titleLines = doc.splitTextToSize(titleText, cellWidth - innerPadding * 2);
               const titleHeight = titleLines.length * 4;
               doc.text(
@@ -279,6 +486,9 @@
               );
               cursorY += titleHeight + 2;
             }
+
+            // Återställ textfärg till svart för övrig text
+            doc.setTextColor(0, 0, 0);
 
             // QR-kod
             const qrAvailableHeight = cellHeight - (cursorY - y) - 20; // lämna plats för text
