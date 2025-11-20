@@ -118,6 +118,217 @@
       <div class="help">Om du väljer en logga placeras den överst på varje biljett.</div>
     </div>
 
-    <div class="fiel
+    <div class="field-group">
+      <label for="titleInput">Rubrik på biljetten</label>
+      <input id="titleInput" type="text" placeholder="Ex: VIP-biljett • Event 2025" />
+    </div>
 
-      
+    <div class="field-group">
+      <label for="bodyInput">Text på biljetten</label>
+      <textarea id="bodyInput" placeholder="Ex: Giltig för en person. Ta med legitimation."></textarea>
+    </div>
+
+    <div class="field-group">
+      <button id="generateBtn">Generera PDF</button>
+      <div class="status status--info" id="statusText"></div>
+    </div>
+
+    <div class="help">
+      Obs: Du måste först välja minst en QR-bild innan knappen gör något.
+      PDF:en laddas ned automatiskt som <strong>biljetter_qr.pdf</strong>.
+    </div>
+  </div>
+
+  <script>
+    // Vänta tills hela sidan är laddad
+    window.addEventListener("DOMContentLoaded", () => {
+      const qrInput = document.getElementById("qrFiles");
+      const logoInput = document.getElementById("logoFile");
+      const titleInput = document.getElementById("titleInput");
+      const bodyInput = document.getElementById("bodyInput");
+      const generateBtn = document.getElementById("generateBtn");
+      const statusText = document.getElementById("statusText");
+
+      function setStatus(message, type = "info") {
+        statusText.textContent = message || "";
+        statusText.className = "status status--" + type;
+        console.log("STATUS:", message);
+      }
+
+      function readFileAsDataURL(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = e => resolve(e.target.result);
+          reader.onerror = err => reject(err);
+          reader.readAsDataURL(file);
+        });
+      }
+
+      async function loadImagesFromFiles(fileList) {
+        const files = Array.from(fileList || []);
+        const result = [];
+        for (const file of files) {
+          if (!file.type.startsWith("image/")) continue;
+          const dataUrl = await readFileAsDataURL(file);
+          result.push({ name: file.name, dataUrl });
+        }
+        return result;
+      }
+
+      async function generatePdf() {
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+          setStatus("jsPDF kunde inte laddas. Kontrollera internetanslutningen.", "error");
+          alert("Fel: jsPDF-biblioteket laddades inte. Prova att ladda om sidan.");
+          return;
+        }
+
+        const qrFiles = qrInput.files;
+        if (!qrFiles || qrFiles.length === 0) {
+          setStatus("Du måste välja minst en QR-kodfil.", "error");
+          alert("Välj minst en QR-kodbild innan du genererar PDF.");
+          return;
+        }
+
+        generateBtn.disabled = true;
+        setStatus("Läser in bilder, detta kan ta en stund vid många filer...", "info");
+
+        try {
+          const qrImages = await loadImagesFromFiles(qrFiles);
+          if (qrImages.length === 0) {
+            setStatus("Hittade inga giltiga bildfiler för QR-koder.", "error");
+            generateBtn.disabled = false;
+            return;
+          }
+
+          let logoImage = null;
+          if (logoInput.files && logoInput.files.length > 0) {
+            const [logoFile] = logoInput.files;
+            const logoDataUrl = await readFileAsDataURL(logoFile);
+            logoImage = { name: logoFile.name, dataUrl: logoDataUrl };
+          }
+
+          const titleText = titleInput.value.trim();
+          const bodyText = bodyInput.value.trim();
+
+          setStatus("Genererar PDF...", "info");
+
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF({
+            orientation: "portrait",
+            unit: "mm",
+            format: "a4"
+          });
+
+          const pageWidth = doc.internal.pageSize.getWidth();   // 210 mm
+          const pageHeight = doc.internal.pageSize.getHeight(); // 297 mm
+
+          const margin = 10;
+          const columns = 2;
+          const rows = 3;
+          const cellWidth = (pageWidth - margin * 2) / columns;
+          const cellHeight = (pageHeight - margin * 2) / rows;
+          const innerPadding = 4;
+
+          qrImages.forEach((img, index) => {
+            const ticketsPerPage = columns * rows; // 6
+            const positionInPage = index % ticketsPerPage;
+            const row = Math.floor(positionInPage / columns);
+            const col = positionInPage % columns;
+
+            if (index > 0 && positionInPage === 0) {
+              doc.addPage();
+            }
+
+            const x = margin + col * cellWidth;
+            const y = margin + row * cellHeight;
+
+            // Ram runt biljetten
+            doc.setDrawColor(200);
+            doc.setLineWidth(0.2);
+            doc.rect(x, y, cellWidth, cellHeight);
+
+            let cursorY = y + innerPadding;
+
+            // Logga
+            if (logoImage) {
+              const logoMaxWidth = cellWidth * 0.4;
+              const logoHeight = logoMaxWidth * 0.35; // ungefärlig ratio
+              const logoX = x + (cellWidth - logoMaxWidth) / 2;
+              doc.addImage(
+                logoImage.dataUrl,
+                "PNG",
+                logoX,
+                cursorY,
+                logoMaxWidth,
+                logoHeight
+              );
+              cursorY += logoHeight + 2;
+            }
+
+            // Rubrik
+            if (titleText) {
+              doc.setFont("helvetica", "bold");
+              doc.setFontSize(11);
+              const titleLines = doc.splitTextToSize(titleText, cellWidth - innerPadding * 2);
+              const titleHeight = titleLines.length * 4;
+              doc.text(
+                titleLines,
+                x + cellWidth / 2,
+                cursorY,
+                { align: "center" }
+              );
+              cursorY += titleHeight + 2;
+            }
+
+            // QR-kod
+            const qrAvailableHeight = cellHeight - (cursorY - y) - 20; // lämna plats för text
+            const qrSize = Math.min(cellWidth * 0.6, qrAvailableHeight);
+            const qrX = x + (cellWidth - qrSize) / 2;
+            const qrY = cursorY;
+
+            doc.addImage(
+              img.dataUrl,
+              "PNG",
+              qrX,
+              qrY,
+              qrSize,
+              qrSize
+            );
+            cursorY = qrY + qrSize + 2;
+
+            // Brödtext
+            if (bodyText) {
+              doc.setFont("helvetica", "normal");
+              doc.setFontSize(9);
+              const textLines = doc.splitTextToSize(bodyText, cellWidth - innerPadding * 2);
+              doc.text(
+                textLines,
+                x + innerPadding,
+                cursorY
+              );
+            }
+          });
+
+          const fileName = "biljetter_qr.pdf";
+          doc.save(fileName);
+          setStatus("Klar! PDF nedladdad: " + fileName, "ok");
+          alert("PDF genererad och nedladdad: " + fileName);
+        } catch (err) {
+          console.error(err);
+          setStatus("Något gick fel vid generering av PDF: " + err.message, "error");
+          alert("Fel vid generering av PDF: " + err.message);
+        } finally {
+          generateBtn.disabled = false;
+        }
+      }
+
+      generateBtn.addEventListener("click", () => {
+        setStatus("Startar generering...", "info");
+        generatePdf();
+      });
+
+      setStatus("Redo. Välj QR-bilder och klicka på \"Generera PDF\".", "info");
+    });
+  </script>
+</body>
+</html>
