@@ -2,10 +2,15 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8" />
-  <title>Biljettgenerator med QR-koder</title>
+  <title>Biljettgenerator med QR-koder (6 per A4)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <!-- jsPDF från CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+    defer
+  ></script>
+
   <style>
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -104,34 +109,15 @@
     <div class="field-group">
       <label for="qrFiles">QR-koder (PNG/JPG, flera filer)</label>
       <input id="qrFiles" type="file" accept="image/png,image/jpeg" multiple />
-      <div class="help">Välj alla QR-kodbilderna (t.ex. 1000 st). De används en per biljett.</div>
+      <div class="help">Välj alla QR-kodbilderna (t.ex. 1000 st). En bild per biljett.</div>
     </div>
 
     <div class="field-group">
       <label for="logoFile">Logga (valfri)</label>
       <input id="logoFile" type="file" accept="image/*" />
-      <div class="help">Om du väljer en logga placeras den högst upp på varje biljett.</div>
+      <div class="help">Om du väljer en logga placeras den överst på varje biljett.</div>
     </div>
 
-    <div class="field-group">
-      <label for="titleInput">Rubrik på biljetten</label>
-      <input id="titleInput" type="text" placeholder="Ex: VIP-biljett • Evenemang 2025" />
-    </div>
+    <div class="fiel
 
-    <div class="field-group">
-      <label for="bodyInput">Text på biljetten</label>
-      <textarea id="bodyInput" placeholder="Ex: Giltig för en person. Ta med legitimation."></textarea>
-    </div>
-
-    <div class="field-group">
-      <button id="generateBtn">Generera PDF</button>
-      <div class="status status--info" id="statusText"></div>
-    </div>
-
-    <div class="help">
-      Tips: När PDF:en är nerladdad kan du skriva ut den på A4. Layouten är 2 kolumner × 3 rader (6 biljetter per sida).
-    </div>
-  </div>
-
-  <script>
-    const qrInput =
+      
