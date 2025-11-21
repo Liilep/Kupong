@@ -116,7 +116,7 @@
       <label for="templateFile">Mallbild rekomenderas storlek är 800 X 765 </label>
       <input id="templateFile" type="file" accept="image/*" />
       <div class="help">
-        Detta är den färdiga biljettdesignen (t.ex. PNG). QR-koden läggs ovanpå denna bild på samma ställe för alla biljetter.
+        Detta är den färdiga designen (t.ex. PNG). QR-koden läggs ovanpå denna bild på samma ställe för alla.
       </div>
     </div>
 
@@ -134,7 +134,7 @@
         <div>
           <label for="qrOffsetX">QR X-position (mm)</label>
           <input id="qrOffsetX" type="number" step="0.5" value="10" />
-          <div class="help">Avstånd från mallbildens vänstra kant.</div>
+          <div class="help">Avstånd från mallbildens vänstra kant (35mm är mitten ca).</div>
         </div>
         <div>
           <label for="qrOffsetY">QR Y-position (mm)</label>
@@ -148,7 +148,6 @@
         </div>
       </div>
       <div class="help">
-        Dessa mått gäller på den utskrivna mallbilden när den placerats i biljettrutan.
         Du kan justera med testutskrifter tills det sitter perfekt.
       </div>
     </div>
@@ -159,8 +158,8 @@
     </div>
 
     <div class="help">
-      Layout: A4 stående, 2 kolumner × 3 rader (6 biljetter per sida).<br />
-      Varje biljett = mallbild + en unik QR-kod på samma position.
+      Layout: A4 stående, 2 kolumner × 3 rader (6 per sida).<br />
+      Varje layout = mallbild + en unik QR-kod på samma position.
     </div>
   </div>
 
