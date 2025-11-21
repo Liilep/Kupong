@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8" />
-  <title>Mall + QR-biljettgenerator (6 per A4)</title>
+  <title>QR-kod på mallbild (6 per A4)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- jsPDF från CDN -->
@@ -110,10 +110,10 @@
 </head>
 <body>
   <div class="container">
-    <h1>Mall + QR-biljettgenerator – 6 per A4</h1>
+    <h1>QR-kod på mallbild (6 per A4)</h1>
 
     <div class="field-group">
-      <label for="templateFile">Mallbild (en biljett-layout)</label>
+      <label for="templateFile">Mallbild rekomenderas storlek är 800 X 765 </label>
       <input id="templateFile" type="file" accept="image/*" />
       <div class="help">
         Detta är den färdiga biljettdesignen (t.ex. PNG). QR-koden läggs ovanpå denna bild på samma ställe för alla biljetter.
@@ -124,12 +124,12 @@
       <label for="qrFiles">QR-koder (PNG/JPG, flera filer)</label>
       <input id="qrFiles" type="file" accept="image/png,image/jpeg" multiple />
       <div class="help">
-        Välj alla QR-kodbilder (t.ex. upp till 1000 st). Varje mallbild får en unik QR-kod.
+        Välj alla QR-kodbilder upp till 1000 st. Varje mallbild får en unik QR-kod.
       </div>
     </div>
 
     <div class="field-group">
-      <label>QR-position och storlek (mm på mallbilden)</label>
+      <label>QR-position och storlek (mm på mallbilden, mitten är 35mm)</label>
       <div class="two-cols">
         <div>
           <label for="qrOffsetX">QR X-position (mm)</label>
