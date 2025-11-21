@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8" />
-  <title>Biljettgenerator med QR-koder (6 per A4)</title>
+  <title>Mall + QR-biljettgenerator (6 per A4)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- jsPDF från CDN -->
@@ -20,7 +20,7 @@
       color: #111827;
     }
     .container {
-      max-width: 1100px;
+      max-width: 900px;
       margin: 0 auto;
       background: white;
       padding: 1.5rem 2rem;
@@ -32,12 +32,6 @@
       font-size: 1.7rem;
       text-align: center;
     }
-    .layout {
-      display: grid;
-      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-      gap: 1.5rem;
-      align-items: flex-start;
-    }
     .field-group {
       margin-bottom: 1rem;
     }
@@ -47,17 +41,13 @@
       margin-bottom: 0.25rem;
     }
     input[type="text"],
-    textarea {
+    input[type="number"] {
       width: 100%;
       padding: 0.5rem 0.75rem;
       border-radius: 0.5rem;
       border: 1px solid #d1d5db;
       font-size: 0.95rem;
       box-sizing: border-box;
-    }
-    textarea {
-      min-height: 80px;
-      resize: vertical;
     }
     input[type="file"] {
       margin-top: 0.25rem;
@@ -66,6 +56,16 @@
       font-size: 0.8rem;
       color: #6b7280;
       margin-top: 0.2rem;
+    }
+    .two-cols {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+    @media (max-width: 700px) {
+      .two-cols {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+      }
     }
     button {
       display: inline-flex;
@@ -106,165 +106,73 @@
     .status--info {
       color: #374151;
     }
-
-    /* Preview-stil */
-    .preview-wrapper {
-      border-left: 1px solid #e5e7eb;
-      padding-left: 1.5rem;
-    }
-    .preview-title {
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-    }
-    .ticket-preview {
-      border-radius: 0.75rem;
-      border: 1px solid #e5e7eb;
-      padding: 1rem;
-      background: #f9fafb;
-      width: 100%;
-      max-width: 340px;
-      aspect-ratio: 2/1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 0.5rem;
-    }
-    .ticket-preview-logo {
-      max-width: 40%;
-      max-height: 50px;
-      object-fit: contain;
-    }
-    .ticket-preview-title {
-      font-size: 1rem;
-      font-weight: 700;
-      text-align: center;
-      margin: 0.2rem 0;
-    }
-    .ticket-preview-qr {
-      max-width: 40%;
-      max-height: 80px;
-      object-fit: contain;
-    }
-    .ticket-preview-body {
-      font-size: 0.8rem;
-      text-align: center;
-      padding: 0 0.5rem;
-    }
-
-    .color-row {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-    .color-row input[type="color"] {
-      width: 40px;
-      height: 30px;
-      padding: 0;
-      border-radius: 0.5rem;
-      border: 1px solid #d1d5db;
-      background: transparent;
-    }
-
-    @media (max-width: 900px) {
-      .layout {
-        grid-template-columns: minmax(0, 1fr);
-      }
-      .preview-wrapper {
-        border-left: none;
-        border-top: 1px solid #e5e7eb;
-        padding-left: 0;
-        padding-top: 1.5rem;
-        margin-top: 1.5rem;
-      }
-      .ticket-preview {
-        margin-inline: auto;
-      }
-    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Biljettgenerator – 6 biljetter per A4</h1>
+    <h1>Mall + QR-biljettgenerator – 6 per A4</h1>
 
-    <div class="layout">
-      <!-- Vänster: Formulär -->
-      <div>
-        <div class="field-group">
-          <label for="qrFiles">QR-koder (PNG/JPG, flera filer)</label>
-          <input id="qrFiles" type="file" accept="image/png,image/jpeg" multiple />
-          <div class="help">Välj alla QR-kodbilderna (t.ex. 1000 st). En bild per biljett.</div>
+    <div class="field-group">
+      <label for="templateFile">Mallbild (en biljett-layout)</label>
+      <input id="templateFile" type="file" accept="image/*" />
+      <div class="help">
+        Detta är den färdiga biljettdesignen (t.ex. PNG). QR-koden läggs ovanpå denna bild på samma ställe för alla biljetter.
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label for="qrFiles">QR-koder (PNG/JPG, flera filer)</label>
+      <input id="qrFiles" type="file" accept="image/png,image/jpeg" multiple />
+      <div class="help">
+        Välj alla QR-kodbilder (t.ex. upp till 1000 st). Varje mallbild får en unik QR-kod.
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>QR-position och storlek (mm på mallbilden)</label>
+      <div class="two-cols">
+        <div>
+          <label for="qrOffsetX">QR X-position (mm)</label>
+          <input id="qrOffsetX" type="number" step="0.5" value="10" />
+          <div class="help">Avstånd från mallbildens vänstra kant.</div>
         </div>
-
-        <div class="field-group">
-          <label for="logoFile">Logga (valfri)</label>
-          <input id="logoFile" type="file" accept="image/*" />
-          <div class="help">Loggan behåller proportionerna och placeras överst på biljett.</div>
+        <div>
+          <label for="qrOffsetY">QR Y-position (mm)</label>
+          <input id="qrOffsetY" type="number" step="0.5" value="10" />
+          <div class="help">Avstånd från mallbildens övre kant.</div>
         </div>
-
-        <div class="field-group">
-          <label for="titleInput">Rubrik på biljetten</label>
-          <input id="titleInput" type="text" placeholder="Ex: VIP-biljett • Event 2025" />
-        </div>
-
-        <div class="field-group">
-          <label for="titleColor">Färg på rubriken</label>
-          <div class="color-row">
-            <input id="titleColor" type="color" value="#111827" />
-            <span class="help">Välj valfri rubrikfärg (används både i preview och PDF).</span>
-          </div>
-        </div>
-
-        <div class="field-group">
-          <label for="bodyInput">Text på biljetten</label>
-          <textarea id="bodyInput" placeholder="Ex: Giltig för en person. Ta med legitimation."></textarea>
-        </div>
-
-        <div class="field-group">
-          <button id="generateBtn">Generera PDF</button>
-          <div class="status status--info" id="statusText"></div>
-        </div>
-
-        <div class="help">
-          Obs: Du måste först välja minst en QR-bild innan knappen gör något.
-          PDF:en laddas ned automatiskt som <strong>biljetter_qr.pdf</strong>.
+        <div>
+          <label for="qrSize">QR storlek (mm)</label>
+          <input id="qrSize" type="number" step="0.5" value="25" />
+          <div class="help">Bredd och höjd (kvadrat).</div>
         </div>
       </div>
-
-      <!-- Höger: Preview -->
-      <div class="preview-wrapper">
-        <div class="preview-title">Förhandsvisning av biljett</div>
-        <div class="ticket-preview" id="ticketPreview">
-          <img id="previewLogo" class="ticket-preview-logo" alt="Förhandsvisning logga" style="display:none;" />
-          <div id="previewTitle" class="ticket-preview-title">Rubrik visas här</div>
-          <img id="previewQr" class="ticket-preview-qr" alt="Förhandsvisning QR" style="display:none;" />
-          <div id="previewBody" class="ticket-preview-body">
-            Texten på biljetten visas här.
-          </div>
-        </div>
-        <div class="help" style="margin-top:0.5rem;">
-          Preview visar ungefärlig layout för en biljett (inte exakt A4-skala, men samma innehåll, logga, färg och text).
-        </div>
+      <div class="help">
+        Dessa mått gäller på den utskrivna mallbilden när den placerats i biljettrutan.
+        Du kan justera med testutskrifter tills det sitter perfekt.
       </div>
+    </div>
+
+    <div class="field-group">
+      <button id="generateBtn">Generera PDF</button>
+      <div class="status status--info" id="statusText"></div>
+    </div>
+
+    <div class="help">
+      Layout: A4 stående, 2 kolumner × 3 rader (6 biljetter per sida).<br />
+      Varje biljett = mallbild + en unik QR-kod på samma position.
     </div>
   </div>
 
   <script>
-    // Vänta tills hela sidan är laddad
     window.addEventListener("DOMContentLoaded", () => {
+      const templateInput = document.getElementById("templateFile");
       const qrInput = document.getElementById("qrFiles");
-      const logoInput = document.getElementById("logoFile");
-      const titleInput = document.getElementById("titleInput");
-      const bodyInput = document.getElementById("bodyInput");
-      const titleColorInput = document.getElementById("titleColor");
+      const qrOffsetXInput = document.getElementById("qrOffsetX");
+      const qrOffsetYInput = document.getElementById("qrOffsetY");
+      const qrSizeInput = document.getElementById("qrSize");
       const generateBtn = document.getElementById("generateBtn");
       const statusText = document.getElementById("statusText");
-
-      // Preview-element
-      const previewLogo = document.getElementById("previewLogo");
-      const previewTitle = document.getElementById("previewTitle");
-      const previewQr = document.getElementById("previewQr");
-      const previewBody = document.getElementById("previewBody");
 
       function setStatus(message, type = "info") {
         statusText.textContent = message || "";
@@ -292,7 +200,7 @@
         });
       }
 
-      async function loadImagesFromFiles(fileList) {
+      async function loadQrImages(fileList) {
         const files = Array.from(fileList || []);
         const result = [];
         for (const file of files) {
@@ -303,71 +211,16 @@
         return result;
       }
 
-      function hexToRgb(hex) {
-        if (!hex) return { r: 0, g: 0, b: 0 };
-        hex = hex.replace("#", "");
-        if (hex.length === 3) {
-          hex = hex.split("").map(c => c + c).join("");
-        }
-        const num = parseInt(hex, 16);
-        return {
-          r: (num >> 16) & 255,
-          g: (num >> 8) & 255,
-          b: num & 255
-        };
-      }
-
-      // --- Preview-uppdatering ---
-
-      // Uppdatera rubrik-preview
-      titleInput.addEventListener("input", () => {
-        const text = titleInput.value.trim();
-        previewTitle.textContent = text || "Rubrik visas här";
-      });
-
-      // Uppdatera text-preview
-      bodyInput.addEventListener("input", () => {
-        const text = bodyInput.value.trim();
-        previewBody.textContent = text || "Texten på biljetten visas här.";
-      });
-
-      // Uppdatera rubrikfärg-preview
-      titleColorInput.addEventListener("input", () => {
-        previewTitle.style.color = titleColorInput.value || "#111827";
-      });
-      // init
-      previewTitle.style.color = titleColorInput.value || "#111827";
-
-      // Uppdatera logo-preview
-      logoInput.addEventListener("change", async () => {
-        if (!logoInput.files || !logoInput.files.length) {
-          previewLogo.style.display = "none";
-          previewLogo.src = "";
-          return;
-        }
-        const dataUrl = await readFileAsDataURL(logoInput.files[0]);
-        previewLogo.src = dataUrl;
-        previewLogo.style.display = "block";
-      });
-
-      // Uppdatera QR-preview (första vald bild)
-      qrInput.addEventListener("change", async () => {
-        if (!qrInput.files || !qrInput.files.length) {
-          previewQr.style.display = "none";
-          previewQr.src = "";
-          return;
-        }
-        const dataUrl = await readFileAsDataURL(qrInput.files[0]);
-        previewQr.src = dataUrl;
-        previewQr.style.display = "block";
-      });
-
-      // --- PDF-generering ---
-
       async function generatePdf() {
         if (!window.jspdf || !window.jspdf.jsPDF) {
           setStatus("jsPDF kunde inte laddas. Kontrollera internetanslutningen.", "error");
           alert("Fel: jsPDF-biblioteket laddades inte. Prova att ladda om sidan.");
+          return;
+        }
+
+        if (!templateInput.files || templateInput.files.length === 0) {
+          setStatus("Du måste välja en mallbild.", "error");
+          alert("Välj en mallbild först.");
           return;
         }
 
@@ -378,31 +231,28 @@
           return;
         }
 
+        // Hämta parametrar
+        const qrOffsetXmm = parseFloat(qrOffsetXInput.value) || 0;
+        const qrOffsetYmm = parseFloat(qrOffsetYInput.value) || 0;
+        const qrSizemm   = parseFloat(qrSizeInput.value)   || 20;
+
         generateBtn.disabled = true;
-        setStatus("Läser in bilder, detta kan ta en stund vid många filer...", "info");
+        setStatus("Läser in mallbild och QR-koder...", "info");
 
         try {
-          const qrImages = await loadImagesFromFiles(qrFiles);
+          // Läs mallbilden
+          const templateFile = templateInput.files[0];
+          const templateDataUrl = await readFileAsDataURL(templateFile);
+          const templateSize = await getImageSize(templateDataUrl);
+          const templateRatio = templateSize.height / templateSize.width; // h/w
+
+          // Läs QR-bilder
+          const qrImages = await loadQrImages(qrFiles);
           if (qrImages.length === 0) {
-            setStatus("Hittade inga giltiga bildfiler för QR-koder.", "error");
+            setStatus("Hittade inga giltiga QR-bildfiler.", "error");
             generateBtn.disabled = false;
             return;
           }
-
-          // Logga: läs och ta fram aspect ratio
-          let logoImage = null;
-          if (logoInput.files && logoInput.files.length > 0) {
-            const [logoFile] = logoInput.files;
-            const logoDataUrl = await readFileAsDataURL(logoFile);
-            const size = await getImageSize(logoDataUrl);
-            const ratio = size.height / size.width; // h/w
-            logoImage = { name: logoFile.name, dataUrl: logoDataUrl, ratio };
-          }
-
-          const titleText = titleInput.value.trim();
-          const bodyText = bodyInput.value.trim();
-          const titleColorHex = titleColorInput.value || "#111827";
-          const titleColorRgb = hexToRgb(titleColorHex);
 
           setStatus("Genererar PDF...", "info");
 
@@ -421,9 +271,9 @@
           const rows = 3;
           const cellWidth = (pageWidth - margin * 2) / columns;
           const cellHeight = (pageHeight - margin * 2) / rows;
-          const innerPadding = 4;
 
-          qrImages.forEach((img, index) => {
+          // Loopa över alla QR-koder, generera en biljett per QR
+          qrImages.forEach((qr, index) => {
             const ticketsPerPage = columns * rows; // 6
             const positionInPage = index % ticketsPerPage;
             const row = Math.floor(positionInPage / columns);
@@ -433,93 +283,58 @@
               doc.addPage();
             }
 
-            const x = margin + col * cellWidth;
-            const y = margin + row * cellHeight;
+            const cellX = margin + col * cellWidth;
+            const cellY = margin + row * cellHeight;
 
-            // Ram runt biljetten
-            doc.setDrawColor(200);
+            // Rita en svag ram runt biljetten (frivilligt – kan kommenteras bort)
+            doc.setDrawColor(220);
             doc.setLineWidth(0.2);
-            doc.rect(x, y, cellWidth, cellHeight);
+            doc.rect(cellX, cellY, cellWidth, cellHeight);
 
-            let cursorY = y + innerPadding;
+            // Beräkna mallbildens storlek i cellen (behåll proportioner, "contain")
+            const cellAspect = cellWidth / cellHeight;
+            const imgAspect = 1 / templateRatio; // w/h
+            let drawWidth, drawHeight;
 
-            // Logga (behåller proportioner)
-            if (logoImage) {
-              // sätt maxstorlek inom cellen
-              const maxLogoWidth = cellWidth * 0.4;
-              const maxLogoHeight = cellHeight * 0.2; // 20% av höjden
-              let logoW = maxLogoWidth;
-              let logoH = logoW * logoImage.ratio; // h = w * (h/w)
-
-              if (logoH > maxLogoHeight) {
-                // skala ner om den blir för hög
-                logoH = maxLogoHeight;
-                logoW = logoH / logoImage.ratio;
-              }
-
-              const logoX = x + (cellWidth - logoW) / 2;
-
-              doc.addImage(
-                logoImage.dataUrl,
-                "PNG",
-                logoX,
-                cursorY,
-                logoW,
-                logoH
-              );
-              cursorY += logoH + 2;
+            if (imgAspect > cellAspect) {
+              // Bilden är "bredare" än cellen → begränsa på bredd
+              drawWidth = cellWidth;
+              drawHeight = drawWidth * templateRatio;
+            } else {
+              // Bilden är "högre" → begränsa på höjd
+              drawHeight = cellHeight;
+              drawWidth = drawHeight / templateRatio;
             }
 
-            // Rubrik
-            if (titleText) {
-              doc.setFont("helvetica", "bold");
-              doc.setFontSize(11);
-              doc.setTextColor(titleColorRgb.r, titleColorRgb.g, titleColorRgb.b);
+            const imgX = cellX + (cellWidth - drawWidth) / 2;
+            const imgY = cellY + (cellHeight - drawHeight) / 2;
 
-              const titleLines = doc.splitTextToSize(titleText, cellWidth - innerPadding * 2);
-              const titleHeight = titleLines.length * 4;
-              doc.text(
-                titleLines,
-                x + cellWidth / 2,
-                cursorY,
-                { align: "center" }
-              );
-              cursorY += titleHeight + 2;
-            }
-
-            // Återställ textfärg till svart för övrig text
-            doc.setTextColor(0, 0, 0);
-
-            // QR-kod
-            const qrAvailableHeight = cellHeight - (cursorY - y) - 20; // lämna plats för text
-            const qrSize = Math.min(cellWidth * 0.6, qrAvailableHeight);
-            const qrX = x + (cellWidth - qrSize) / 2;
-            const qrY = cursorY;
-
+            // Rita mallbilden
             doc.addImage(
-              img.dataUrl,
+              templateDataUrl,
+              "PNG",
+              imgX,
+              imgY,
+              drawWidth,
+              drawHeight
+            );
+
+            // QR-position: relativt mallbildens övre vänstra hörn (i mm)
+            const qrX = imgX + qrOffsetXmm;
+            const qrY = imgY + qrOffsetYmm;
+
+            // Rita QR-bilden (kvadrat)
+            doc.addImage(
+              qr.dataUrl,
               "PNG",
               qrX,
               qrY,
-              qrSize,
-              qrSize
+              qrSizemm,
+              qrSizemm
             );
-            cursorY = qrY + qrSize + 2;
-
-            // Brödtext
-            if (bodyText) {
-              doc.setFont("helvetica", "normal");
-              doc.setFontSize(9);
-              const textLines = doc.splitTextToSize(bodyText, cellWidth - innerPadding * 2);
-              doc.text(
-                textLines,
-                x + innerPadding,
-                cursorY
-              );
-            }
           });
 
-          const fileName = "biljetter_qr.pdf";
+          const fileName = "biljetter_mall_qr.pdf";
           doc.save(fileName);
           setStatus("Klar! PDF nedladdad: " + fileName, "ok");
           alert("PDF genererad och nedladdad: " + fileName);
@@ -537,7 +352,7 @@
         generatePdf();
       });
 
-      setStatus("Redo. Välj QR-bilder och klicka på \"Generera PDF\".", "info");
+      setStatus("Redo. Välj mallbild + QR-koder och klicka på \"Generera PDF\".", "info");
     });
   </script>
 </body>
